@@ -420,6 +420,15 @@ button {
                 button {
                     margin-right: 10px;
                 }
+                .btn-group {
+                    button{
+                        top: -2px;
+                        margin-right: 0;
+                    }
+                    .dropdown-toggle{
+                        margin-right: 8px;    
+                    }
+                }
                 .section-title {
                     display: block;
                     color: $text-grey;

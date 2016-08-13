@@ -23,7 +23,7 @@ class MatchPage extends Component {
 
     getList(){
         let self = this;
-        fetch(config.FRONTEND_HOST + '?r=match/getlist')
+        fetch(config.FRONTEND_HOST + '?r=match/getlist&no_cache=1')
         .then(function(res) {
             return res.json();
         }).then(function(data) {
@@ -78,7 +78,7 @@ class MatchPage extends Component {
                 </li>);
         });
         const item = list[activeIndex] != null ? list[activeIndex] : null;
-        const matchItem = item != null ? <MatchItemPage item={item} active={false}/> : <div className="empty">Empty</div>
+        const matchItem = item != null ? <MatchItemPage match_pid={item.match_pid} active={false}/> : <div className="empty">Empty</div>
         return (
             <div className="live-container">
                 <div className="lives">

@@ -31,10 +31,10 @@ route.get("/active-list", function(req, res){
 
 route.get("/getFileSavePath", function(req, res){
     Setting.get("file-save-path", function(value){
-        var path = "";
-        if(value) path = value;
-        if(!path) path = path.join(util.getHomePath(), "Data");
-        res.jsonOutput({"status": 1, "path": path});
+        var _path = "";
+        if(value) _path = value;
+        if(!_path) _path = path.join(util.getHomePath(), "Data");
+        res.jsonOutput({"status": 1, "path": _path});
     });
 });
 

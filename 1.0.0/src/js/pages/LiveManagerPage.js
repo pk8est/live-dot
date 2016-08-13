@@ -1,11 +1,14 @@
+const fs = require('fs');
 const electron = require('electron');
 const ipcRenderer = electron.ipcRenderer;
+
 import React, { Component, PropTypes } from 'react';
 import config from '../../server/config';
 import live from '../backend/live';
 import moment from 'moment';
 import $ from 'jquery';
 import VideoListPage from './VideoListPage';
+const channel = "selected-send-image";
 
 
 class LiveManagerPage extends Component {
@@ -16,6 +19,7 @@ class LiveManagerPage extends Component {
             match_id: 0,
             list: [],
         };
+        ipcRenderer.on(channel, this.handlerSendImage.bind(this));
     }
 
     componentDidMount() {
@@ -71,11 +75,42 @@ class LiveManagerPage extends Component {
         }
     }
 
+    handlerSendImage(event, path){
+        let self = this;
+        path.map((image, index) => {
+            live.sendMessage({
+                r: "live/sendimage",
+                match_id: self.state.match_id,
+                screenshot: fs.createReadStream(image),
+            }, function(error, message, data){
+                if(error){
+                    alert(message);
+                }else{
+                    self.appendMessage(data)
+                }
+            });
+        })
+    }
+
+    handlerSelectImage(){
+        ipcRenderer.send('open-file-dialog-image', channel);
+    }
+
     appendMessage(item){
         let list = this.state.list
         list.push(item);
         this.setState({list: list});
         this.scrollBottom();
+    }
+
+    removeMessage(id){
+        let list = this.state.list
+        list.forEach(function(item, index) {
+            if(item.message_id == id){
+                delete list[index];
+            }
+        });
+        this.setState({list: list});
     }
 
     scrollBottom(){
@@ -105,6 +140,30 @@ class LiveManagerPage extends Component {
         });
     }
 
+    handlerRemoveMessage(id){
+        let self = this;
+        if(!confirm("你确定要删除该信息吗?")){
+            return false;
+        }
+        live.sendMessage({
+            r: "live/delete",
+            message_id: id,
+        }, function(error, message, data){
+            if(error){
+                alert(message);
+            }else{
+                self.removeMessage(id)
+            }
+        });
+    }
+
+    handlerKeyUp(event){
+        if(!event.shiftKey && event.keyCode == 13){
+            this.handlerSendMessage();
+            return event.preventDefault(); 
+        }
+    }
+
     renderList(list){
         let self = this;
         return list.map((item, index) => {
@@ -115,10 +174,11 @@ class LiveManagerPage extends Component {
             return (
                 <div className="live-item">
                     <pre>
+                        <button type="button"  className="close" onClick={this.handlerRemoveMessage.bind(this, item.message_id)}>×</button>
                         <div className="live-time text-center"><code>{time}</code></div>
                         <div className="live-screenshot">{screenshot}</div>
                         <div className="live-video">{video}</div>
-                        <div className="live-content">{content}</div>
+                        <div className="live-content"  dangerouslySetInnerHTML={{__html: content}}></div>
                     </pre>
                 </div>
             )
@@ -128,7 +188,8 @@ class LiveManagerPage extends Component {
     renderInput(){
         return (
             <div className="live-input">
-                <textarea rows="6" id="message"></textarea>
+                <textarea rows="6" id="message" onKeyUp={this.handlerKeyUp.bind(this)}></textarea>
+                <button className="btn btn-info" onClick={this.handlerSelectImage.bind(this)}>图片</button>
                 <button className="btn btn-info pull-right" onClick={this.handlerSendMessage.bind(this)}>发送</button>
             </div>
         )

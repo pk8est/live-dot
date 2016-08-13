@@ -5,6 +5,7 @@ import React, { Component, PropTypes } from 'react';
 import moment from 'moment';
 import filesize from 'filesize';
 import config from '../../server/config';
+import util from '../utils/util';
 
 
 class LiveItemPage extends Component {
@@ -12,17 +13,17 @@ class LiveItemPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            matchs: [],
+            //matchs: [],
             match_pid: 0,
             copyMessage: "",
         };
     }
 
     componentDidMount() {
-        this.getMatchList();
+        //this.getMatchList();
     }
 
-    getMatchList(){
+    /*getMatchList(){
         let self = this;
         fetch(config.FRONTEND_HOST + '?r=match/getlist')
         .then(function(res) {
@@ -34,12 +35,12 @@ class LiveItemPage extends Component {
                 });
             }
         });
-    }
+    }*/
 
-    setMatchPid(match_pid){
+    /*setMatchPid(match_pid){
         this.setState({match_pid: match_pid});
     }
-
+*/
     handleCopyUrl(url){
         let slef = this;
         clipboard.writeText(url);
@@ -74,16 +75,20 @@ class LiveItemPage extends Component {
         }
     }
 
-    handleRelateMatch(){
+    /*handleRelateMatch(){
         let match_pid = document.getElementById("match_pid").value;
         if(match_pid && match_pid != this.state.match_pid){
             this.setMatchPid(match_pid);
         }
-    }
+    }*/
 
     handleUpload(file){
         let self = this;
-        self.handleEmitEventCallback("upload-video", {id: self.props.item.id, file_id: file.id}, function(message){
+        self.handleEmitEventCallback("upload-video", {
+            id: self.props.item.id, 
+            file_id: file.id,
+            udb: util.getUDB(),
+        }, function(message){
             alert(message);
         })
     }
@@ -113,7 +118,7 @@ class LiveItemPage extends Component {
         });
     }
 
-    renderMatchList(){
+    /*renderMatchList(){
         let self = this;
         let options = this.state.matchs.map((item, index) => {
             return (
@@ -126,7 +131,7 @@ class LiveItemPage extends Component {
                 { options }
             </select>
         );
-    }
+    }*/
 
     renderVideoList(){
         return (
@@ -187,12 +192,12 @@ class LiveItemPage extends Component {
                     <span className="label-title">已经录制时间</span>
                     <span className="label-content"><code>{second} </code></span>
                 </section>
-                <section>
-                    <span className="label-title">关联比赛</span>
-                    <span className="">
-                        { self.renderMatchList() }
-                    </span>
-                </section>
+                {/*<section>
+                                    <span className="label-title">关联比赛</span>
+                                    <span className="">
+                                        { self.renderMatchList() }
+                                    </span>
+                                </section>*/}
                 { self.renderVideoList() }
                 <section>
                     <span className="label-title">播放地址</span>

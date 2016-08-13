@@ -35,7 +35,6 @@ class SettingPage extends Component {
     }
 
     setFileSavePath(event, path){
-        console.info(path)
         if(path[0]){
             socket.emit("update-file-save-path", path[0]);
             this.setState({fileSavePath: path[0]});

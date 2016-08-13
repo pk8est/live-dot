@@ -36,7 +36,7 @@ var App = React.createClass({
             name: "管理后台",
             to : "manager",
             className: "fa fa-table",
-        },{
+        }/*,{
             name: "调试",
             to : "debug",
             className: "fa fa-bug",
@@ -44,7 +44,7 @@ var App = React.createClass({
             name: "日志",
             to : "log",
             className: "fa fa-code",
-        },{
+        }*/,{
             name: "录屏",
             to : "screen",
             className: "fa fa-tachometer",

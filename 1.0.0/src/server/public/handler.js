@@ -158,41 +158,18 @@ module.exports.cutRecord = function (options){
 module.exports.uploadVideo = function(options, callback){
     var id = options.id;
     var file_id = options.file_id;
+    var udb = options.udb;
     var thread = null;
     if(threads.hasOwnProperty(id)){
-        uploadFile(file_id, threads[id], callback);
+        uploadFile(file_id, threads[id], udb, callback);
     }else{
         Live.get(id, function(thread){
             if(thread){
-                uploadFile(file_id, thread, callback);
+                uploadFile(file_id, thread, udb, callback);
             }
         })
     }
-    /*Video.get(id, function(item){
-        if(item && item.uploaded==0 && item.vid==0){
-            var formData = {
-                udb: "dw_wuzhonggui",
-                channel: "test",
-                video: fs.createReadStream(item.file),
-                filename: item.filename,
-            }
-            request.post({
-               url: config.FRONTEND_HOST + '?r=video/post',
-               formData: formData
-            }, (err, response, body) => {
-                if(response.statusCode == 200){
-                    let data = JSON.parse(body)
-                    if(callback) callback(data.message)
-                    Video.update(id, {
-                        vid: data.vid ? data.vid : 0,
-                        status: data.code == 1 ? 1 : -1,
-                    })
-                }else{
-                    if(callback) callback("上传失败!")
-                } 
-            })
-        }
-    })*/
+    module.exports.notice("active-list", module.exports.getActiveList(), true);
 }
 
 module.exports.removeThread = function (id){
@@ -238,25 +215,34 @@ module.exports.notice = function (event, message, force){
 
 module.exports.threads = threads;
 
-function uploadFile(id, thread, callback){
-    var item = thread.data.cutFiles.hasOwnProperty(id) ? thread.data.cutFiles[id] : null;
-    item = item == null && thread.data.files.hasOwnProperty(id) ? thread.data.files[id] : item;
-    logger.debug(item)
+function uploadFile(id, thread, udb, callback){
+    var item = null;
+    var itemKey = null;
+    var maps = ['cutFiles', 'files']
+    for(key in maps){
+        var value = maps[key];
+        if(thread.data[value].hasOwnProperty(id)){
+            item = thread.data[value][id];
+            itemKey = value;
+            break;
+        }
+    }
     if(item && item.uploaded==0 && item.vid==0){
         var formData = {
-            udb: "dw_wuzhonggui",
+            r: "video/post",
+            udb: udb,
             channel: "test",
             video: fs.createReadStream(item.file),
             filename: item.filename,
         }
         request.post({
-           url: config.FRONTEND_HOST + '?r=video/post',
+           url: config.FRONTEND_HOST,
            formData: formData
         }, (err, response, body) => {
             if(response.statusCode == 200){
                 var data = JSON.parse(body);
-                thread.data.cutFiles[id].vid = data.vid ? data.vid : 0;
-                thread.data.cutFiles[id].status =  data.code == 1 ? 1 : -1;
+                thread.data[itemKey][id].vid = data.vid ? data.vid : 0;
+                thread.data[itemKey][id].status =  data.code == 1 ? 1 : -1;
                 thread.save();
                 if(callback) callback(data.message)
             }else{

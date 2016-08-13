@@ -17,14 +17,22 @@ class live {
         for(name in options){
             form.append(name, options[name]);
         }
-        fetch(config.FRONTEND_HOST, { method: 'POST', body: form })
+        fetch(config.MANAGER_HOST, { method: 'POST', body: form })
         .then(function(res) {
-            return res.json();
+            try{
+                return res.json();
+            }catch(e){
+                return res.text();
+            }
         }).then(function(json) {
-            if(json.hasOwnProperty("code") && json.code==1){
-                callback(null, json.message, json.result)
+            if(typeof json == 'object'){
+                if(json.hasOwnProperty("code") && json.code==1){
+                    callback(null, json.message, json.result)
+                }else{
+                    callback(true, json.message, null)
+                }
             }else{
-                callback(true, json.message, null)
+                console.info(json)
             }
         });
     }
